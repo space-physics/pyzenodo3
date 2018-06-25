@@ -27,6 +27,17 @@ import pyzenodo3
 zen = pyzenodo3.Zenodo()
 ```
 
+### Upload file to Zenodo
+
+0. Get a Zenodo API Token. 
+   This token must remain private, NOT uploaded to GitHub, etc.!
+1. create a simple text file `mymeta.ini` containing title, author etc. (see the example `meta.ini` in this repo)
+2. upload file to Zenodo  (myApiToken is the cut-n-pasted Zenodo API text token)
+   ```sh
+   ./upload_zenodo.py myApiToken mymeta.ini myfile.zip
+   ```
+
+
 ### Find Zenodo record by Github repo
 ```python
 Rec = zen.find_record__by_github_repo('scivision/lowtran')

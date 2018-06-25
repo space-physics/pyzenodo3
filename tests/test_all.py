@@ -1,6 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+from pathlib import Path
 import pyzenodo3
+import pyzenodo3.upload as zup
 import pytest
+
+R = Path(__file__).resolve().parents[1]
+metain = R / 'meta.ini'
 
 
 @pytest.fixture()
@@ -12,3 +17,9 @@ def test_search(zen):
     recs = zen.search('scivision')
     assert isinstance(recs, list)
     assert isinstance(recs[0], pyzenodo3.Record)
+
+
+def test_meta():
+    zup.meta(metain)
+
+    assert metain.with_suffix('.json').is_file()
