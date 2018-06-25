@@ -1,6 +1,9 @@
 [![Travis-CI Build Status](https://travis-ci.com/scivision/pyzenodo3.svg?branch=master)](https://travis-ci.com/scivision/pyzenodo3)
 [![Coverage Status](https://coveralls.io/repos/github/scivision/pyzenodo3/badge.svg?branch=master)](https://coveralls.io/github/scivision/pyzenodo3?branch=master)
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/dthxw7mc0sw0suee?svg=true)](https://ci.appveyor.com/project/scivision/pyzenodo3)
+[![pypi versions](https://img.shields.io/pypi/pyversions/pyzenodo3.svg)](https://pypi.python.org/pypi/pyzenodo3)
+[![pypi format](https://img.shields.io/pypi/format/pyzenodo3.svg)](https://pypi.python.org/pypi/pyzenodo3)
+[![PyPi Download stats](http://pepy.tech/badge/pyzenodo3)](http://pepy.tech/project/pyzenodo3)
 
 # PyZenodo 3
 
