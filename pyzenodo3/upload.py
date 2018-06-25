@@ -49,22 +49,28 @@ def meta(inifn: Path) -> Path:
     return outfn
 
 
-def upload(metafn: Path, datafn: Path, token: str, live: bool):
+def upload(metafn: Path, datafn: Path, token: Union[str, Path], live: bool):
     """takes metadata and file and uploads to Zenodo"""
+
+    if not metafn:
+        raise ValueError('must specify API token or file containing the token')
 
     metafn = Path(metafn).expanduser()
     datafn = Path(datafn).expanduser()
+    assert datafn.is_file(), "for now, upload a file only"
 
     if not metafn.is_file():
         raise FileNotFoundError('meta JSON file is required')
 
-    assert datafn.is_file(), "for now, upload a file only"
-
     meta = metafn.read_text()
 
     base_url = BASE_URL if live else SANDBOX_URL
-
-    if not token or not isinstance(token, str):
+# %% token
+    if Path(token).expanduser().is_file():
+        token = Path(token).expanduser().read_text().strip()  # in case \n or spaces sneak in
+    elif isinstance(token, str) and 100 > len(token) > 10:
+        pass
+    else:
         raise ValueError('API Token must be specified to upload to Zenodo')
 # %% Create new paper submission
     url = f"{base_url}/deposit/depositions/?access_token={token}"

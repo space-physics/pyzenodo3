@@ -32,7 +32,7 @@ zen = pyzenodo3.Zenodo()
 
 ### Upload file to Zenodo
 
-0. Get a [Zenodo API Token](https://zenodo.org/account/settings/applications/tokens/new/). 
+0. Get a Zenodo `deposit:write` [API Token](https://zenodo.org/account/settings/applications/tokens/new/). 
    This token must remain private, NOT uploaded to GitHub, etc.!
 1. create a simple text file `mymeta.ini` containing title, author etc. (see the example `meta.ini` in this repo)
 2. upload file to Zenodo  (myApiToken is the cut-n-pasted Zenodo API text token)
@@ -54,3 +54,6 @@ Recs = zen.search('scivision')
 Recs is a `list` of Zenodo Records for the GitHub username queried, as in the example above.
 
 
+## Notes
+
+* We don't use `deposit:publish` API token to keep a human-in-the-loop in case of hacking of sensor nodes.
