@@ -32,7 +32,7 @@ zen = pyzenodo3.Zenodo()
 
 ### Upload file to Zenodo
 
-0. Get a Zenodo API Token. 
+0. Get a [Zenodo API Token](https://zenodo.org/account/settings/applications/tokens/new/). 
    This token must remain private, NOT uploaded to GitHub, etc.!
 1. create a simple text file `mymeta.ini` containing title, author etc. (see the example `meta.ini` in this repo)
 2. upload file to Zenodo  (myApiToken is the cut-n-pasted Zenodo API text token)
