@@ -1,5 +1,5 @@
-[![build status](https://travis-ci.org/scivision/pyzenodo3.svg?branch=master)](https://travis-ci.org/scivision/pyzenodo3)
-[![coverage](https://coveralls.io/repos/github/scivision/pyzenodo3/badge.svg?branch=master)](https://coveralls.io/github/scivision/pyzenodo3)
+[![Build Status](https://travis-ci.com/scivision/pyzenodo3.svg?branch=master)](https://travis-ci.com/scivision/pyzenodo3)
+[![Coverage Status](https://coveralls.io/repos/github/scivision/pyzenodo3/badge.svg?branch=master)](https://coveralls.io/github/scivision/pyzenodo3?branch=master)
 
 # PyZenodo 3
 
