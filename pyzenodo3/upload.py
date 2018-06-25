@@ -9,7 +9,7 @@ SANDBOX_URL = "https://sandbox.zenodo.org/api"
 BASE_URL = "https://zenodo.org/api"
 
 
-def meta(inifn: Path):
+def meta(inifn: Path) -> Path:
     """ creates metadata for Zenodo upload.
     1. create dict() with metadata
     2. convert dict() to json
@@ -46,11 +46,21 @@ def meta(inifn: Path):
     print('writing JSON metadata to', outfn)
     outfn.write_text(json_meta)
 
+    return outfn
 
-def upload(metadata, path: Path, token: str, live: bool):
+
+def upload(metafn: Path, datafn: Path, token: str, live: bool):
     """takes metadata and file and uploads to Zenodo"""
 
-    assert path.is_file(), "for now, a file only"
+    metafn = Path(metafn).expanduser()
+    datafn = Path(datafn).expanduser()
+
+    if not metafn.is_file():
+        raise FileNotFoundError('meta JSON file is required')
+
+    assert datafn.is_file(), "for now, upload a file only"
+
+    meta = metafn.read_text()
 
     base_url = BASE_URL if live else SANDBOX_URL
 
@@ -59,7 +69,7 @@ def upload(metadata, path: Path, token: str, live: bool):
 # %% Create new paper submission
     url = f"{base_url}/deposit/depositions/?access_token={token}"
     headers = {"Content-Type": "application/json"}
-    response = requests.post(url, data=metadata, headers=headers)
+    response = requests.post(url, data=meta, headers=headers)
 
     if response.status_code != 200:
         raise requests.HTTPError(f"Error happened during submission, status code: {response.status_code}")
@@ -67,12 +77,14 @@ def upload(metadata, path: Path, token: str, live: bool):
     submission_id = json.loads(response.text)["id"]
 # %% Upload
     url = f"{base_url}/api/deposit/depositions/{submission_id}/files?access_token={token}"
-    upload_metadata = {'filename': str(path)}
-    files = {'file': path.open('rb')}
+
+    upload_metadata = {'filename': str(metafn)}
+
+    files = {'file': datafn.open('rb')}
 
     response = requests.post(url, data=upload_metadata, files=files)
 
     if response.status_code != 200:
         raise requests.HTTPError(f"Error happened during submission, status code: {response.status_code}")
 
-    print(f"{path} submitted with submission ID = {submission_id} (DOI: 10.5281/zenodo.{submission_id})")
+    print(f"{datafn} submitted with submission ID = {submission_id} (DOI: 10.5281/zenodo.{submission_id})")

@@ -2,11 +2,11 @@
 """
 inspired by https://github.com/darvasd/upload-to-zenodo/
 """
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 import pyzenodo3.upload as zup
 
 
-def main():
+def cmdparse() -> Namespace:
     p = ArgumentParser(description='Upload data to Zenodo staging')
     p.add_argument('apikey', help='Zenodo API key',
                    nargs='?')
@@ -15,12 +15,11 @@ def main():
                    nargs='?')
     p.add_argument('-y', '--yes', help='upload to Zenodo, not just the sandbox',
                    action='store_true')
-    P = p.parse_args()
-
-    zup.meta(P.inifn)
-
-#    zup.upload(path, P.apikey, P.yes)
+    return p.parse_args()
 
 
 if __name__ == '__main__':
-    main()
+    p = cmdparse()
+
+    metafn = zup.meta(p.inifn)
+    zup.upload(metafn, p.path, p.apikey, p.yes)
