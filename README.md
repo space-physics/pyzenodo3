@@ -17,3 +17,25 @@ Latest development
     pip install -e .
 
 ## Usage
+
+Here are several examples of using Zenodo from Python 3.
+All of them assume you have first:
+```python
+import pyzenodo3
+
+zen = pyzenodo3.Zenodo()
+```
+
+### Find Zenodo record by Github repo
+```python
+Rec = zen.find_record__by_github_repo('scivision/lowtran')
+```
+This Zenodo Record contains the metadata that can be further manipulated in a simple class containing the data in dictionaries, with a few future helper methods.
+
+### Find Zenodo records by Github username
+```python
+Recs = zen.search('scivision')
+```
+Recs is a `list` of Zenodo Records for the GitHub username queried, as in the example above.
+
+

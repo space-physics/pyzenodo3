@@ -1,42 +1,52 @@
 # -*- coding: utf-8 -*-
 import requests
 import re
-
+from typing import List, Dict
 from bs4 import BeautifulSoup
-
-import urllib.parse as urlparse
+from bs4.element import Tag
 from urllib.parse import urlencode
 
-BASE_URL = 'https://sandbox.zenodo.org/api/'
+BASE_URL = 'https://zenodo.org/api/'
 
 
 class Record():
-    data = None
 
-    def __init__(self, data, zenodo):
+    def __init__(self, data, zenodo, base_url: str=BASE_URL) -> None:
+        self.base_url = base_url
         self.data = data
         self._zenodo = zenodo
 
-    def _row_to_version(self, row) -> dict:
+    def _row_to_version(self, row: Tag) -> Dict[str, str]:
         link = row.select('a')[0]
+        linkrec = row.select('a')[0].attrs['href']
+        if not linkrec:
+            raise KeyError('record not found in parsed HTML')
+
         texts = row.select('small')
-        recid = re.match(r'/record/(\d*)', link.attrs['href']).group(1)
+        recmatch = re.match(r'/record/(\d*)', linkrec)
+        if not recmatch:
+            raise LookupError('record match not found in parsed HTML')
+
+        recid = recmatch.group(1)
+
         return {
-            'recid' : recid,
-            'name'  : link.text,
-            'doi'   : texts[0].text,
-            'date'  : texts[1].text,
-            'original_version' : self._zenodo.get_record(recid).original_version()
+            'recid': recid,
+            'name': link.text,
+            'doi': texts[0].text,
+            'date': texts[1].text,
+            'original_version': self._zenodo.get_record(recid).original_version()
         }
 
     def get_versions(self) -> list:
-        url = '%srecords?all_versions=1&size=100&q=conceptrecid:%s' % (base_url, self.data['conceptrecid'])
+        url = f"{self.base_url}srecords?all_versions=1&size=100&q=conceptrecid:{self.data['conceptrecid']}"
+
         print(url)
+
         data = requests.get(url).json()
+
         return [Record(hit, self._zenodo) for hit in data['hits']['hits']]
 
-
-    def get_versions_from_webpage(self):
+    def get_versions_from_webpage(self) -> list:
         """Get version details from Zenodo webpage (it is not available in the REST api)"""
         res = requests.get('https://zenodo.org/record/'+self.data['conceptrecid'])
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -62,11 +72,12 @@ class Record():
 
 
 class Zenodo():
-    def __init__(self, api_key=''):
+    def __init__(self, api_key: str='', base_url: str=BASE_URL) -> None:
+        self.base_url = base_url
         self._api_key = api_key
         self.re_github_repo = re.compile(r'.*github.com/(.*?/.*?)[/$]')
 
-    def search(self, search: str):
+    def search(self, search: str) -> List[Record]:
         """search Zenodo record for string `search`
 
         :param search: string to search
@@ -74,38 +85,53 @@ class Zenodo():
         """
         search = search.replace('/', ' ')  # zenodo can't handle '/' in search query
         params = {'q': search}
-        return self._get_records(params)
+
+        recs = self._get_records(params)
+
+        if not recs:
+            raise LookupError(f'No records found for search {search}')
+
+        return recs
 
     def _extract_github_repo(self, identifier):
         matches = self.re_github_repo.match(identifier)
+
         if matches:
             return matches.group(1)
-        return None
 
-    def find_record_by_github_repo(self, search):
+        raise LookupError(f'No records found with {identifier}')
+
+    def find_record_by_github_repo(self, search: str):
         records = self.search(search)
         for record in records:
             if 'metadata' not in record.data or 'related_identifiers' not in record.data['metadata']:
                 continue
+
             for identifier in [identifier['identifier'] for identifier in record.data['metadata']['related_identifiers']]:
                 repo = self._extract_github_repo(identifier)
+
                 if repo and repo.upper() == search.upper():
                     return record
-        return None
 
-    def find_record_by_doi(self, doi):
-        params = {'q': 'conceptdoi:%s' % doi.replace('/', '*')}
+        raise LookupError(f'No records found in {search}')
+
+    def find_record_by_doi(self, doi: str):
+        params = {'q': f"conceptdoi:{doi.replace('/', '*')}"}
         records = self._get_records(params)
+
         if len(records) > 0:
             return records[0]
         else:
             params = {'q': 'doi:%s' % doi.replace('/', '*')}
             return self._get_records(params)[0]
 
-    def get_record(self, recid):
-        url = base_url + 'records/' + recid
+    def get_record(self, recid: str) -> Record:
+
+        url = self.base_url + 'records/' + recid
+
         return Record(requests.get(url).json(), self)
 
-    def _get_records(self, params):
-        url = base_url + 'records?' + urlencode(params)
+    def _get_records(self, params: Dict[str, str]) -> List[Record]:
+        url = self.base_url + 'records?' + urlencode(params)
+
         return [Record(hit, self) for hit in requests.get(url).json()['hits']['hits']]
