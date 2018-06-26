@@ -5,9 +5,8 @@ import requests
 from configparser import ConfigParser
 from typing import Dict, Union, List
 
-SANDBOX_URL = "https://sandbox.zenodo.org/api"
 BASE_URL = "https://zenodo.org/api"
-
+HDR = {"Content-Type": "application/json"}
 
 def meta(inifn: Path) -> Path:
     """ creates metadata for Zenodo upload.
@@ -49,48 +48,88 @@ def meta(inifn: Path) -> Path:
     return outfn
 
 
-def upload(metafn: Path, datafn: Path, token: Union[str, Path], live: bool):
-    """takes metadata and file and uploads to Zenodo"""
+def check_token(token: str):
+    if not isinstance(token, str) or not token:
+        raise TypeError('Token need to be a string')
 
-    if not metafn:
-        raise ValueError('must specify API token or file containing the token')
+    r = requests.get('https://zenodo.org/api/deposit/depositions',
+                     params={'access_token': token})
 
-    metafn = Path(metafn).expanduser()
-    datafn = Path(datafn).expanduser()
-    assert datafn.is_file(), "for now, upload a file only"
+    if r.status_code != 200:
+        raise requests.HTTPError(f"Token accept error, status code: {r.status_code}  {r.json()['message']}")
 
-    if not metafn.is_file():
-        raise FileNotFoundError('meta JSON file is required')
 
-    meta = metafn.read_text()
-
-    base_url = BASE_URL if live else SANDBOX_URL
-# %% token
+def get_token(token: Union[str, Path]) -> str:
     if Path(token).expanduser().is_file():
         token = Path(token).expanduser().read_text().strip()  # in case \n or spaces sneak in
     elif isinstance(token, str) and 100 > len(token) > 10:
         pass
     else:
         raise ValueError('API Token must be specified to upload to Zenodo')
-# %% Create new paper submission
-    url = f"{base_url}/deposit/depositions/?access_token={token}"
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(url, data=meta, headers=headers)
 
-    if response.status_code != 200:
-        raise requests.HTTPError(f"Error happened during submission, status code: {response.status_code}")
-# %% Get the submission ID
-    submission_id = json.loads(response.text)["id"]
-# %% Upload
-    url = f"{base_url}/api/deposit/depositions/{submission_id}/files?access_token={token}"
+    return token
 
-    upload_metadata = {'filename': str(metafn)}
 
-    files = {'file': datafn.open('rb')}
+def upload_meta(token: str, metafn: Path, depid: str):
+    """upload metadata to zenodo"""
+    
+    if not metafn:
+        raise ValueError('must specify API token or file containing the token')
 
-    response = requests.post(url, data=upload_metadata, files=files)
+    metafn = Path(metafn).expanduser()
 
-    if response.status_code != 200:
-        raise requests.HTTPError(f"Error happened during submission, status code: {response.status_code}")
+    if not metafn.is_file():
+        raise FileNotFoundError('meta JSON file is required')
 
-    print(f"{datafn} submitted with submission ID = {submission_id} (DOI: 10.5281/zenodo.{submission_id})")
+    meta = metafn.read_text()
+
+    r = requests.put(f"{BASE_URL}/deposit/depositions/{depid}",
+                      params={'access_token': token},
+                      data=meta, #json.dumps(meta), 
+                      headers=HDR)
+                      
+    if r.status_code != 200:
+        raise requests.HTTPError(f"Error in metadata upload, status code: {r.status_code}   {r.json()['message']}")
+        
+        
+def upload_data(token: str, datafn: Path, depid: str):
+
+    r = requests.post(f"{BASE_URL}/deposit/depositions/{depid}/files",
+                      params={'access_token': token},
+                      data={'filename': str(datafn)}, 
+                      files={'file': datafn.open('rb')})
+
+    if r.status_code != 201:
+        raise requests.HTTPError(f"Error in data upload, status code: {r.status_code}   {r.json()['message']}")
+        
+    print(f"{datafn} ID = {depid} (DOI: 10.5281/zenodo.{depid})")
+    
+    
+def create(token: str) -> str:
+    
+    r = requests.post(f"{BASE_URL}/deposit/depositions", 
+                      params={'access_token': token},
+                      json={}, 
+                      headers=HDR)
+
+    if r.status_code != 201:
+        raise requests.HTTPError(f"Error in creation, status code: {r.status_code}   {r.json()['message']}")
+# %% Get the deposition ID
+    return r.json()["id"]
+
+def upload(metafn: Path, datafn: Path, token: Union[str, Path]):
+    """takes metadata and file and uploads to Zenodo"""
+
+    datafn = Path(datafn).expanduser()
+    assert datafn.is_file(), "for now, upload a file only"
+
+# %% token check
+    token = get_token(token)
+
+    check_token(token)
+# %% Create new submission
+    depid = create(token)
+# %% Upload data
+    upload_data(token, datafn, depid)
+# %% add metadata
+    # upload_meta(token, metafn, depid) 

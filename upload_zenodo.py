@@ -13,13 +13,15 @@ def cmdparse() -> Namespace:
     p.add_argument('inifn', help='mymeta.ini file with author, title, etc.')
     p.add_argument('path', help='directory or file to upload to Zenodo',
                    nargs='?')
-    p.add_argument('-y', '--yes', help='upload to Zenodo, not just the sandbox',
-                   action='store_true')
     return p.parse_args()
 
 
-if __name__ == '__main__':
+def main():
     p = cmdparse()
 
     metafn = zup.meta(p.inifn)
-    zup.upload(metafn, p.path, p.apikey, p.yes)
+    zup.upload(metafn, p.path, p.apikey)
+    
+    
+if __name__ == '__main__':
+    main()
