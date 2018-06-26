@@ -8,6 +8,7 @@ from typing import Dict, Union, List
 BASE_URL = "https://zenodo.org/api"
 HDR = {"Content-Type": "application/json"}
 
+
 def meta(inifn: Path) -> Path:
     """ creates metadata for Zenodo upload.
     1. create dict() with metadata
@@ -72,7 +73,7 @@ def get_token(token: Union[str, Path]) -> str:
 
 def upload_meta(token: str, metafn: Path, depid: str):
     """upload metadata to zenodo"""
-    
+
     if not metafn:
         raise ValueError('must specify API token or file containing the token')
 
@@ -84,38 +85,39 @@ def upload_meta(token: str, metafn: Path, depid: str):
     meta = metafn.read_text()
 
     r = requests.put(f"{BASE_URL}/deposit/depositions/{depid}",
-                      params={'access_token': token},
-                      data=meta, #json.dumps(meta), 
-                      headers=HDR)
-                      
+                     params={'access_token': token},
+                     data=meta,  # json.dumps(meta),
+                     headers=HDR)
+
     if r.status_code != 200:
         raise requests.HTTPError(f"Error in metadata upload, status code: {r.status_code}   {r.json()['message']}")
-        
-        
+
+
 def upload_data(token: str, datafn: Path, depid: str):
 
     r = requests.post(f"{BASE_URL}/deposit/depositions/{depid}/files",
                       params={'access_token': token},
-                      data={'filename': str(datafn)}, 
+                      data={'filename': str(datafn)},
                       files={'file': datafn.open('rb')})
 
     if r.status_code != 201:
         raise requests.HTTPError(f"Error in data upload, status code: {r.status_code}   {r.json()['message']}")
-        
+
     print(f"{datafn} ID = {depid} (DOI: 10.5281/zenodo.{depid})")
-    
-    
+
+
 def create(token: str) -> str:
-    
-    r = requests.post(f"{BASE_URL}/deposit/depositions", 
+
+    r = requests.post(f"{BASE_URL}/deposit/depositions",
                       params={'access_token': token},
-                      json={}, 
+                      json={},
                       headers=HDR)
 
     if r.status_code != 201:
         raise requests.HTTPError(f"Error in creation, status code: {r.status_code}   {r.json()['message']}")
 # %% Get the deposition ID
     return r.json()["id"]
+
 
 def upload(metafn: Path, datafn: Path, token: Union[str, Path]):
     """takes metadata and file and uploads to Zenodo"""
@@ -132,4 +134,4 @@ def upload(metafn: Path, datafn: Path, token: Union[str, Path]):
 # %% Upload data
     upload_data(token, datafn, depid)
 # %% add metadata
-    # upload_meta(token, metafn, depid) 
+    # upload_meta(token, metafn, depid)

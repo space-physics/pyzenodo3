@@ -21,7 +21,7 @@ def main():
 
     metafn = zup.meta(p.inifn)
     zup.upload(metafn, p.path, p.apikey)
-    
-    
+
+
 if __name__ == '__main__':
     main()
