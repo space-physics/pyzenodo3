@@ -3,6 +3,7 @@ fast_finish: true
 
 python:
   - 3.6
+  - 3.7-dev
 
 group: travis_latest
 
