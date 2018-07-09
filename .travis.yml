@@ -1,15 +1,22 @@
 language: python
-fast_finish: true
+sudo: required
+dist: xenial
+group: travis_latest
+
+git:
+  depth: 3
+  quiet: true
 
 python:
   - 3.6
-  - 3.7-dev
+  - 3.7
 
-group: travis_latest
+os:
+  - linux
 
 install: pip install -e .[tests]
 
-script: 
+script:
   - pytest -sv
   - flake8
   - mypy . --ignore-missing-imports
