@@ -25,11 +25,12 @@ matrix:
   - os: osx
     language: minimal
     install: pip3 install -e .[tests]
-  - os: windows
-    language: minimal
-    before_install:
-    - choco install python3
-    - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
+# temp disable travis bug
+#  - os: windows
+#    language: minimal
+#    before_install:
+#    - choco install python3
+#    - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
 
 install: pip install -e .[tests]
 
