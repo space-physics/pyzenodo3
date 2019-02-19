@@ -11,7 +11,7 @@ BASE_URL = 'https://zenodo.org/api/'
 
 class Record():
 
-    def __init__(self, data, zenodo, base_url: str=BASE_URL) -> None:
+    def __init__(self, data, zenodo, base_url: str = BASE_URL) -> None:
         self.base_url = base_url
         self.data = data
         self._zenodo = zenodo
@@ -72,7 +72,7 @@ class Record():
 
 
 class Zenodo():
-    def __init__(self, api_key: str='', base_url: str=BASE_URL) -> None:
+    def __init__(self, api_key: str = '', base_url: str = BASE_URL) -> None:
         self.base_url = base_url
         self._api_key = api_key
         self.re_github_repo = re.compile(r'.*github.com/(.*?/.*?)[/$]')

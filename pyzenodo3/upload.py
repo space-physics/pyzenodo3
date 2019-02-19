@@ -5,7 +5,7 @@ import requests
 from configparser import ConfigParser
 from typing import Dict, Union, List
 
-BASE_URL = "https://zenodo.org/api"
+from . import BASE_URL
 HDR = {"Content-Type": "application/json"}
 
 

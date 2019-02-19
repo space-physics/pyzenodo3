@@ -8,7 +8,7 @@ R = Path(__file__).resolve().parents[1]
 metain = R / 'meta.ini'
 
 
-@pytest.fixture()
+@pytest.fixture
 def zen():
     return pyzenodo3.Zenodo()
 
