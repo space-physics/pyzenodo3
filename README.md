@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/138543765.svg)](https://zenodo.org/badge/latestdoi/138543765)
+
 [![Travis-CI Build Status](https://travis-ci.com/scivision/pyzenodo3.svg?branch=master)](https://travis-ci.com/scivision/pyzenodo3)
 [![Coverage Status](https://coveralls.io/repos/github/scivision/pyzenodo3/badge.svg?branch=master)](https://coveralls.io/github/scivision/pyzenodo3?branch=master)
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/dthxw7mc0sw0suee?svg=true)](https://ci.appveyor.com/project/scivision/pyzenodo3)
