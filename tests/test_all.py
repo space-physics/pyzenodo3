@@ -5,7 +5,7 @@ import pyzenodo3.upload as zup
 import pytest
 
 R = Path(__file__).resolve().parents[1]
-metain = R / 'meta.ini'
+metain = R / "meta.ini"
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def zen():
 
 
 def test_search(zen):
-    recs = zen.search('scivision')
+    recs = zen.search("scivision")
     assert isinstance(recs, list)
     assert isinstance(recs[0], pyzenodo3.Record)
 
@@ -22,4 +22,4 @@ def test_search(zen):
 def test_meta():
     zup.meta(metain)
 
-    assert metain.with_suffix('.json').is_file()
+    assert metain.with_suffix(".json").is_file()

@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    paths-ignore:
+    - "**/*.md"
+  pull_request:
+    paths-ignore:
+    - "**/*.md"
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - run: pip install .[tests,lint]
+    - run: flake8
+    - run: mypy .
+    - run: pytest -r a -v
+      working-directory: tests
+
+  integration:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - run: pip install .[tests]
+    - run: pytest -r a -v
+      working-directory: tests
