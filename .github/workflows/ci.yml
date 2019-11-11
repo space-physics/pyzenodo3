@@ -2,11 +2,11 @@ name: ci
 
 on:
   push:
-    paths-ignore:
-    - "**/*.md"
+    paths:
+    - "**.py"
   pull_request:
     paths-ignore:
-    - "**/*.md"
+    - "**.py"
 
 jobs:
 
@@ -20,7 +20,7 @@ jobs:
     - run: pip install .[tests,lint]
     - run: flake8
     - run: mypy .
-    - run: pytest -r a -v
+    - run: pytest
       working-directory: tests
 
   integration:
@@ -34,5 +34,5 @@ jobs:
       with:
         python-version: '3.x'
     - run: pip install .[tests]
-    - run: pytest -r a -v
+    - run: pytest
       working-directory: tests
