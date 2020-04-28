@@ -50,11 +50,11 @@ def meta(inifn: Path) -> Path:
     return outfn
 
 
-def check_token(token: str):
+def check_token(token: str, base_url: str):
     if not isinstance(token, str) or not token:
         raise TypeError("Token need to be a string")
 
-    r = requests.get("https://zenodo.org/api/deposit/depositions", params={"access_token": token})
+    r = requests.get(f"{base_url}/deposit/depositions", params={"access_token": token})
 
     if r.status_code != 200:
         raise requests.HTTPError(f"Token accept error, status code: {r.status_code}  {r.json()['message']}")
@@ -92,10 +92,10 @@ def upload_meta(token: str, metafn: Path, depid: str):
         raise requests.HTTPError(f"Error in metadata upload, status code: {r.status_code}   {r.json()['message']}")
 
 
-def upload_data(token: str, datafn: Path, depid: str):
+def upload_data(token: str, datafn: Path, depid: str, base_url: str):
 
     r = requests.post(
-        f"{BASE_URL}/deposit/depositions/{depid}/files",
+        f"{base_url}/deposit/depositions/{depid}/files",
         params={"access_token": token},
         data={"filename": str(datafn)},
         files={"file": datafn.open("rb")},
@@ -107,9 +107,9 @@ def upload_data(token: str, datafn: Path, depid: str):
     print(f"{datafn} ID = {depid} (DOI: 10.5281/zenodo.{depid})")
 
 
-def create(token: str) -> str:
+def create(token: str, base_url: str) -> str:
 
-    r = requests.post(f"{BASE_URL}/deposit/depositions", params={"access_token": token}, json={}, headers=HDR)
+    r = requests.post(f"{base_url}/deposit/depositions", params={"access_token": token}, json={}, headers=HDR)
 
     if r.status_code != 201:
         raise requests.HTTPError(f"Error in creation, status code: {r.status_code}   {r.json()['message']}")
@@ -117,7 +117,7 @@ def create(token: str) -> str:
     return r.json()["id"]
 
 
-def upload(metafn: Path, datafn: Path, token: Union[str, Path]):
+def upload(metafn: Path, datafn: Path, token: Union[str, Path], base_url=BASE_URL):
     """takes metadata and file and uploads to Zenodo"""
 
     datafn = Path(datafn).expanduser()
@@ -126,11 +126,11 @@ def upload(metafn: Path, datafn: Path, token: Union[str, Path]):
     # %% token check
     token = get_token(token)
 
-    check_token(token)
+    check_token(token, base_url)
     # %% Create new submission
-    depid = create(token)
+    depid = create(token, base_url)
     # %% Upload data
-    upload_data(token, datafn, depid)
+    upload_data(token, datafn, depid, base_url)
 
     # %% add metadata
     # upload_meta(token, metafn, depid)
