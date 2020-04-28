@@ -1,24 +1,27 @@
+# PyZenodo
+
 [![DOI](https://zenodo.org/badge/138543765.svg)](https://zenodo.org/badge/latestdoi/138543765)
-
-[![Actions Status](https://github.com/space-physics/pyzenodo3/workflows/ci/badge.svg)](https://github.com/space-physics/pyzenodo3/actions)
-
+![Actions Status](https://github.com/space-physics/pyzenodo3/workflows/ci/badge.svg)
 [![pypi versions](https://img.shields.io/pypi/pyversions/pyzenodo3.svg)](https://pypi.python.org/pypi/pyzenodo3)
 [![PyPi Download stats](http://pepy.tech/badge/pyzenodo3)](http://pepy.tech/project/pyzenodo3)
-
-# PyZenodo
 
 Pure Python wrapper for [Zenodo REST API](http://developers.zenodo.org/).
 
 Allows upload / download of data from Zenodo.
 
-
 ## Install
 
-    python -m pip install pyzenodo3
+```sh
+pip install pyzenodo3
+```
 
 Latest development
 
-    pip install -e pyzenodo3
+```sh
+git clone https://github.com/scivision/pyzenodo3
+
+pip install -e pyzenodo3
+```
 
 ## Usage
 
@@ -56,7 +59,6 @@ This Zenodo Record contains the metadata that can be further manipulated in a si
 Recs = zen.search('scivision')
 ```
 Recs is a `list` of Zenodo Records for the GitHub username queried, as in the example above.
-
 
 ## Notes
 

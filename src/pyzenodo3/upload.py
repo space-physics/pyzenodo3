@@ -132,6 +132,5 @@ def upload(metafn: Path, datafn: Path, token: Union[str, Path]):
     # %% Upload data
     upload_data(token, datafn, depid)
 
-
-# %% add metadata
-# upload_meta(token, metafn, depid)
+    # %% add metadata
+    # upload_meta(token, metafn, depid)

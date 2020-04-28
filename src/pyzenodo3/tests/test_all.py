@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 from pathlib import Path
-import pyzenodo3
-import pyzenodo3.upload as zup
 import pytest
 
-R = Path(__file__).resolve().parents[1]
+import pyzenodo3
+import pyzenodo3.upload as zup
+
+R = Path(__file__).parent
 metain = R / "meta.ini"
 
 
