@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 import requests
 import re
-from typing import List, Dict
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from urllib.parse import urlencode
@@ -15,7 +14,7 @@ class Record:
         self.data = data
         self._zenodo = zenodo
 
-    def _row_to_version(self, row: Tag) -> Dict[str, str]:
+    def _row_to_version(self, row: Tag) -> dict[str, str]:
         link = row.select("a")[0]
         linkrec = row.select("a")[0].attrs["href"]
         if not linkrec:
@@ -45,7 +44,7 @@ class Record:
 
         return [Record(hit, self._zenodo) for hit in data["hits"]["hits"]]
 
-    def get_versions_from_webpage(self) -> list:
+    def get_versions_from_webpage(self) -> list[dict]:
         """Get version details from Zenodo webpage (it is not available in the REST api)"""
         res = requests.get("https://zenodo.org/record/" + self.data["conceptrecid"])
         soup = BeautifulSoup(res.text, "html.parser")
@@ -78,7 +77,7 @@ class Zenodo:
         self._api_key = api_key
         self.re_github_repo = re.compile(r".*github.com/(.*?/.*?)[/$]")
 
-    def search(self, search: str) -> List[Record]:
+    def search(self, search: str) -> list[Record]:
         """search Zenodo record for string `search`
 
         :param search: string to search
@@ -105,10 +104,16 @@ class Zenodo:
     def find_record_by_github_repo(self, search: str):
         records = self.search(search)
         for record in records:
-            if "metadata" not in record.data or "related_identifiers" not in record.data["metadata"]:
+            if (
+                "metadata" not in record.data
+                or "related_identifiers" not in record.data["metadata"]
+            ):
                 continue
 
-            for identifier in [identifier["identifier"] for identifier in record.data["metadata"]["related_identifiers"]]:
+            for identifier in [
+                identifier["identifier"]
+                for identifier in record.data["metadata"]["related_identifiers"]
+            ]:
                 repo = self._extract_github_repo(identifier)
 
                 if repo and repo.upper() == search.upper():
@@ -132,7 +137,7 @@ class Zenodo:
 
         return Record(requests.get(url).json(), self)
 
-    def _get_records(self, params: Dict[str, str]) -> List[Record]:
+    def _get_records(self, params: dict[str, str]) -> list[Record]:
         url = self.base_url + "records?" + urlencode(params)
 
         return [Record(hit, self) for hit in requests.get(url).json()["hits"]["hits"]]

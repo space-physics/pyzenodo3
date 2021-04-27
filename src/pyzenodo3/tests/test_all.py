@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from pathlib import Path
 import pytest
 
@@ -24,7 +23,3 @@ def test_meta():
     zup.meta(metain)
 
     assert metain.with_suffix(".json").is_file()
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])

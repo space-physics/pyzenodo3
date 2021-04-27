@@ -42,7 +42,7 @@ zen = pyzenodo3.Zenodo()
 2. upload file to Zenodo  (myApiToken is the cut-n-pasted Zenodo API text token)
 
    ```sh
-   python upload_zenodo.py myApiToken mymeta.ini myfile.zip --use-sandbox
+   python pyzenodo3.upload myApiToken mymeta.ini myfile.zip --use-sandbox
    ```
 
 Note the `--use-sandbox` is to avoid making junk uploads while testing out.

@@ -1,9 +1,11 @@
 """ Zenodo uploads from Python"""
+
+from __future__ import annotations
 from pathlib import Path
 import json
 import requests
 from configparser import ConfigParser
-from typing import Dict, Union, List
+from argparse import ArgumentParser
 
 from .base import BASE_URL
 
@@ -11,7 +13,7 @@ HDR = {"Content-Type": "application/json"}
 
 
 def meta(inifn: Path) -> Path:
-    """ creates metadata for Zenodo upload.
+    """creates metadata for Zenodo upload.
     1. create dict() with metadata
     2. convert dict() to json
     3. write JSON to disk
@@ -19,8 +21,8 @@ def meta(inifn: Path) -> Path:
     SECT = "zenodo"
     inifn = Path(inifn).expanduser()
 
-    Meta: Dict[str, dict] = {"metadata": {}}
-    meta: Dict[str, Union[str, List[str], Dict[str, str]]] = {}
+    Meta: dict[str, dict] = {"metadata": {}}
+    meta: dict[str, str | list[str] | dict[str, str]] = {}
 
     C = ConfigParser(inline_comment_prefixes=("#", ";"))
     C.read(inifn)
@@ -57,10 +59,12 @@ def check_token(token: str, base_url: str):
     r = requests.get(f"{base_url}/deposit/depositions", params={"access_token": token})
 
     if r.status_code != 200:
-        raise requests.HTTPError(f"Token accept error, status code: {r.status_code}  {r.json()['message']}")
+        raise requests.HTTPError(
+            f"Token accept error, status code: {r.status_code}  {r.json()['message']}"
+        )
 
 
-def get_token(token: Union[str, Path]) -> str:
+def get_token(token: str | Path) -> str:
     if Path(token).expanduser().is_file():
         token = Path(token).expanduser().read_text().strip()  # in case \n or spaces sneak in
     elif isinstance(token, str) and 100 > len(token) > 10:
@@ -85,11 +89,16 @@ def upload_meta(token: str, metafn: Path, depid: str):
     meta = metafn.read_text()
 
     r = requests.put(
-        f"{BASE_URL}/deposit/depositions/{depid}", params={"access_token": token}, data=meta, headers=HDR  # json.dumps(meta),
+        f"{BASE_URL}/deposit/depositions/{depid}",
+        params={"access_token": token},
+        data=meta,
+        headers=HDR,  # json.dumps(meta),
     )
 
     if r.status_code != 200:
-        raise requests.HTTPError(f"Error in metadata upload, status code: {r.status_code}   {r.json()['message']}")
+        raise requests.HTTPError(
+            f"Error in metadata upload, status code: {r.status_code}   {r.json()['message']}"
+        )
 
 
 def upload_data(token: str, datafn: Path, depid: str, base_url: str):
@@ -102,22 +111,28 @@ def upload_data(token: str, datafn: Path, depid: str, base_url: str):
     )
 
     if r.status_code != 201:
-        raise requests.HTTPError(f"Error in data upload, status code: {r.status_code}   {r.json()['message']}")
+        raise requests.HTTPError(
+            f"Error in data upload, status code: {r.status_code}   {r.json()['message']}"
+        )
 
     print(f"{datafn} ID = {depid} (DOI: 10.5281/zenodo.{depid})")
 
 
 def create(token: str, base_url: str) -> str:
 
-    r = requests.post(f"{base_url}/deposit/depositions", params={"access_token": token}, json={}, headers=HDR)
+    r = requests.post(
+        f"{base_url}/deposit/depositions", params={"access_token": token}, json={}, headers=HDR
+    )
 
     if r.status_code != 201:
-        raise requests.HTTPError(f"Error in creation, status code: {r.status_code}   {r.json()['message']}")
+        raise requests.HTTPError(
+            f"Error in creation, status code: {r.status_code}   {r.json()['message']}"
+        )
     # %% Get the deposition ID
     return r.json()["id"]
 
 
-def upload(metafn: Path, datafn: Path, token: Union[str, Path], base_url=BASE_URL):
+def upload(metafn: Path, datafn: Path, token: str | Path, base_url=BASE_URL):
     """takes metadata and file and uploads to Zenodo"""
 
     datafn = Path(datafn).expanduser()
@@ -134,3 +149,29 @@ def upload(metafn: Path, datafn: Path, token: Union[str, Path], base_url=BASE_UR
 
     # %% add metadata
     # upload_meta(token, metafn, depid)
+
+
+def main():
+    p = ArgumentParser(description="Upload data to Zenodo staging")
+    p.add_argument("apikey", help="Zenodo API key", nargs="?")
+    p.add_argument("inifn", help="mymeta.ini file with author, title, etc.")
+    p.add_argument("path", help="directory or file to upload to Zenodo", nargs="?")
+    p.add_argument(
+        "--use-sandbox",
+        help="Use sandbox.zenodo.org instead of the real site.",
+        action="store_true",
+    )
+    p = p.parse_args()
+
+    metafn = meta(p.inifn)
+
+    if p.use_sandbox:
+        base_url = "https://sandbox.zenodo.org/api"
+    else:
+        base_url = BASE_URL
+
+    upload(metafn, p.path, p.apikey, base_url=base_url)
+
+
+if __name__ == "__main__":
+    main()
