@@ -77,14 +77,14 @@ class Zenodo:
         self._api_key = api_key
         self.re_github_repo = re.compile(r".*github.com/(.*?/.*?)[/$]")
 
-    def search(self, search: str) -> list[Record]:
+    def search(self, search: str, **kwargs) -> list[Record]:
         """search Zenodo record for string `search`
 
         :param search: string to search
         :return: Record[] results
         """
         search = search.replace("/", " ")  # zenodo can't handle '/' in search query
-        params = {"q": search}
+        params = {"q": search, **kwargs}
 
         recs = self._get_records(params)
 
