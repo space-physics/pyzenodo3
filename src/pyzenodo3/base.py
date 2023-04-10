@@ -67,7 +67,7 @@ class Record:
                 return re.match(r".*/tree/(.*$)", identifier["identifier"]).group(1)
         return None
 
-    def download(self, root):
+    def download(self, root="./"):
 
 
         for file in self.data['files']:
