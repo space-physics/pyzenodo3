@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from urllib.parse import urlencode
-from utils import download_file
+from .utils import download_file
 BASE_URL = "https://zenodo.org/api/"
 
 
@@ -75,7 +75,7 @@ class Record:
             checksum_md5 = file['checksum'].lstrip("md5:")
 
             # now we will download the files to the root.
-            download_file(root= root,url= url, checksum = checksum)
+            download_file(root= root,url= url, checksum = checksum_md5)
 
             
 

@@ -1,8 +1,10 @@
 import requests
+from tqdm import tqdm
 import hashlib
 import urllib
 from pathlib import Path
 #FILE_PATH_TYPE = Union(str, pathlib.Path )
+USER_AGENT = "pyzenodo3"
 
 def calculate_md5(file_path, chunk_size =1024):
     """
@@ -28,16 +30,19 @@ def check_md5(file_loc, checksum:str)->bool:
 # check if the given root exist, if not make the root, then create the 
 
 def download_file(url, checksum, root = "./"):
-
     root = Path(root)
 
     if (not root.is_dir()):
         root.mkdir()
 
     file_name = url.split("/")[-1]
-    file_loc = root + '/' + file_name
+    file_loc = root/file_name
 
-    urllib.request.urlretrieve(url, file_loc)
+    if (file_loc.is_file() and check_md5(file_loc, checksum)):
+        print(f"File {file_name} already downloaded at location {file_loc}")
+        return 
+
+    _urlretrieve(url, file_loc)
 
     if (not check_md5(file_loc, checksum)):
         file_loc.unlink()
@@ -45,4 +50,21 @@ def download_file(url, checksum, root = "./"):
         return 
     print(f"file {file_loc} downloaded successfully")
     
+def _save_response_content(
+    content,
+    destination,
+    length= None,
+) :
+    with open(destination, "wb") as fh, tqdm(total=length) as pbar:
+        for chunk in content:
+            # filter out keep-alive new chunks
+            if not chunk:
+                continue
 
+            fh.write(chunk)
+            pbar.update(len(chunk))
+
+
+def _urlretrieve(url, file_loc, chunk_size = 1024 * 32):
+    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": USER_AGENT})) as response:
+        _save_response_content(iter(lambda: response.read(chunk_size), b""), file_loc, length=response.length)
