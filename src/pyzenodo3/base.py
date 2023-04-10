@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from urllib.parse import urlencode
-
+from utils import download_file
 BASE_URL = "https://zenodo.org/api/"
 
 
@@ -66,6 +66,18 @@ class Record:
             if identifier["relation"] == "isSupplementTo":
                 return re.match(r".*/tree/(.*$)", identifier["identifier"]).group(1)
         return None
+
+    def download(self, root):
+
+
+        for file in self.data['files']:
+            url = file['links']['self']
+            checksum_md5 = file['checksum'].lstrip("md5:")
+
+            # now we will download the files to the root.
+            download_file(root= root,url= url, checksum = checksum)
+
+            
 
     def __str__(self):
         return str(self.data)
