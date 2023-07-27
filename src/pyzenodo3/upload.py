@@ -92,7 +92,7 @@ def upload_meta(token: str, metafn: Path, depid: str):
         f"{BASE_URL}/deposit/depositions/{depid}",
         params={"access_token": token},
         data=json.dumps(meta),
-        headers=HDR,
+        headers=HDR
     )
 
     if r.status_code != 200:
