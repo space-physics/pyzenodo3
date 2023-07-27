@@ -91,8 +91,8 @@ def upload_meta(token: str, metafn: Path, depid: str):
     r = requests.put(
         f"{BASE_URL}/deposit/depositions/{depid}",
         params={"access_token": token},
-        data=meta,
-        headers=HDR,  # json.dumps(meta),
+        data=json.dumps(meta),
+        headers=HDR,
     )
 
     if r.status_code != 200:
@@ -148,7 +148,7 @@ def upload(metafn: Path, datafn: Path, token: str | Path, base_url=BASE_URL):
     upload_data(token, datafn, depid, base_url)
 
     # %% add metadata
-    # upload_meta(token, metafn, depid)
+    upload_meta(token, metafn, depid)
 
 
 def main():
